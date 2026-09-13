@@ -36,14 +36,13 @@ export const ParetoCharts: React.FC<ParetoChartsProps> = ({
 
       try {
         const Plotly = (await import('plotly.js-dist-min')).default;
-        const container = chartContainerRef.current;
+        if (isCancelled || !chartContainerRef.current) return;
 
-        // Pareto points data
+        const container = chartContainerRef.current;
         const paretoPoints = solutions.length > 0 ? solutions : [presetA, presetB, presetC];
 
         if (activeView === 'cost-life') {
-          // 2D: Chi phí (Trục X) vs Tuổi thọ (Trục Y), màu sắc theo Lưu lượng Giao thông
-          // Sắp xếp theo Chi phí để vẽ đường Pareto
+          // 2D: Chi phí (Trục X) vs Tuổi thọ (Trục Y), màu theo Giao thông
           const sorted = [...paretoPoints].sort((a, b) => a.costBillion - b.costBillion);
 
           const traceParetoLine = {
@@ -52,8 +51,8 @@ export const ParetoCharts: React.FC<ParetoChartsProps> = ({
             mode: 'lines',
             name: 'Đường cong Pareto',
             line: {
-              color: 'rgba(6, 182, 212, 0.4)',
-              width: 2,
+              color: '#94a3b8',
+              width: 1.5,
               shape: 'spline',
             },
             hoverinfo: 'skip',
@@ -66,8 +65,8 @@ export const ParetoCharts: React.FC<ParetoChartsProps> = ({
             text: paretoPoints.map(
               (p) =>
                 `<b>Nghiệm:</b> ${p.id}<br>` +
-                `<b>Chi phí:</b> ${p.costBillion.toFixed(3)} tỷ VNĐ<br>` +
-                `<b>Tuổi thọ:</b> ${p.lifespan} năm<br>` +
+                `<b>Chi phí C_ct:</b> ${p.costBillion.toFixed(3)} tỷ VNĐ<br>` +
+                `<b>Tuổi thọ SL:</b> ${p.lifespan} năm<br>` +
                 `<b>Ảnh hưởng GT:</b> ${p.traffic} xe/h`
             ),
             customdata: paretoPoints,
@@ -75,22 +74,21 @@ export const ParetoCharts: React.FC<ParetoChartsProps> = ({
             name: 'Nghiệm Pareto',
             type: 'scatter',
             marker: {
-              size: 10,
+              size: 9,
               color: paretoPoints.map((p) => p.traffic),
-              colorscale: 'Viridis',
+              colorscale: 'Blues',
               colorbar: {
-                title: { text: 'GT (xe/h)', font: { color: '#94a3b8', size: 11 } },
-                tickfont: { color: '#94a3b8', size: 10 },
+                title: { text: 'GT (xe/h)', font: { color: '#475569', size: 11 } },
+                tickfont: { color: '#64748b', size: 10 },
                 len: 0.8,
               },
               showscale: true,
               line: { color: '#ffffff', width: 1 },
-              opacity: 0.88,
+              opacity: 0.85,
             },
             hoverinfo: 'text',
           };
 
-          // Presets trace
           const tracePresets = {
             x: [presetA.costBillion, presetB.costBillion, presetC.costBillion],
             y: [presetA.lifespan, presetB.lifespan, presetC.lifespan],
@@ -101,20 +99,19 @@ export const ParetoCharts: React.FC<ParetoChartsProps> = ({
             ],
             customdata: [presetA, presetB, presetC],
             mode: 'markers+text',
-            name: 'Phương án mẫu A, B, C',
+            name: 'Phương án A, B, C',
             textposition: 'top center',
-            textfont: { color: '#f8fafc', size: 11, family: 'sans-serif' },
+            textfont: { color: '#0f172a', size: 11, family: 'sans-serif' },
             type: 'scatter',
             marker: {
-              size: 16,
-              symbol: 'star-diamond',
-              color: ['#10b981', '#3b82f6', '#f59e0b'],
+              size: 14,
+              symbol: 'diamond',
+              color: ['#16a34a', '#2563eb', '#d97706'],
               line: { color: '#ffffff', width: 2 },
             },
             hoverinfo: 'text',
           };
 
-          // Selected trace
           const traces: any[] = [traceParetoLine, traceParetoPoints, tracePresets];
 
           if (selectedSolution) {
@@ -122,13 +119,13 @@ export const ParetoCharts: React.FC<ParetoChartsProps> = ({
               x: [selectedSolution.costBillion],
               y: [selectedSolution.lifespan],
               mode: 'markers',
-              name: 'Nghiệm đang chọn',
+              name: 'Đang chọn',
               type: 'scatter',
               marker: {
-                size: 20,
+                size: 18,
                 symbol: 'circle-open',
-                color: '#facc15', // Vibrant yellow
-                line: { color: '#facc15', width: 3 },
+                color: '#0f172a',
+                line: { color: '#0f172a', width: 2.5 },
               },
               hoverinfo: 'skip',
             });
@@ -136,23 +133,23 @@ export const ParetoCharts: React.FC<ParetoChartsProps> = ({
 
           const layout: any = {
             autosize: true,
-            margin: { l: 60, r: 30, t: 30, b: 50 },
-            paper_bgcolor: 'transparent',
-            plot_bgcolor: 'rgba(15, 23, 42, 0.4)',
+            margin: { l: 60, r: 30, t: 25, b: 50 },
+            paper_bgcolor: '#ffffff',
+            plot_bgcolor: '#f8fafc',
             xaxis: {
-              title: { text: 'Tổng Chi phí C_ct (Tỷ VNĐ)', font: { color: '#94a3b8', size: 12 } },
-              tickfont: { color: '#94a3b8', size: 10 },
-              gridcolor: 'rgba(51, 65, 85, 0.3)',
-              zerolinecolor: 'rgba(51, 65, 85, 0.5)',
+              title: { text: 'Tổng Chi phí C_ct (Tỷ VNĐ)', font: { color: '#334155', size: 12 } },
+              tickfont: { color: '#64748b', size: 10 },
+              gridcolor: '#e2e8f0',
+              zerolinecolor: '#cbd5e1',
             },
             yaxis: {
-              title: { text: 'Tuổi thọ trung bình SL (Năm)', font: { color: '#94a3b8', size: 12 } },
-              tickfont: { color: '#94a3b8', size: 10 },
-              gridcolor: 'rgba(51, 65, 85, 0.3)',
-              zerolinecolor: 'rgba(51, 65, 85, 0.5)',
+              title: { text: 'Tuổi thọ trung bình SL (Năm)', font: { color: '#334155', size: 12 } },
+              tickfont: { color: '#64748b', size: 10 },
+              gridcolor: '#e2e8f0',
+              zerolinecolor: '#cbd5e1',
             },
             legend: {
-              font: { color: '#cbd5e1', size: 11 },
+              font: { color: '#334155', size: 11 },
               orientation: 'h',
               y: 1.12,
               x: 0,
@@ -169,7 +166,7 @@ export const ParetoCharts: React.FC<ParetoChartsProps> = ({
 
           await Plotly.react(container, traces, layout, config);
         } else if (activeView === 'cost-traffic') {
-          // 2D: Chi phí (Trục X) vs Ảnh hưởng Giao thông (Trục Y), màu theo Tuổi thọ
+          // 2D: Chi phí vs Giao thông
           const sorted = [...paretoPoints].sort((a, b) => a.costBillion - b.costBillion);
 
           const traceParetoLine = {
@@ -178,8 +175,8 @@ export const ParetoCharts: React.FC<ParetoChartsProps> = ({
             mode: 'lines',
             name: 'Đường cong Pareto',
             line: {
-              color: 'rgba(244, 63, 94, 0.4)',
-              width: 2,
+              color: '#94a3b8',
+              width: 1.5,
               shape: 'spline',
             },
             hoverinfo: 'skip',
@@ -201,17 +198,17 @@ export const ParetoCharts: React.FC<ParetoChartsProps> = ({
             name: 'Nghiệm Pareto',
             type: 'scatter',
             marker: {
-              size: 10,
+              size: 9,
               color: paretoPoints.map((p) => p.lifespan),
-              colorscale: 'Plasma',
+              colorscale: 'Viridis',
               colorbar: {
-                title: { text: 'TTC (năm)', font: { color: '#94a3b8', size: 11 } },
-                tickfont: { color: '#94a3b8', size: 10 },
+                title: { text: 'Tuổi thọ (năm)', font: { color: '#475569', size: 11 } },
+                tickfont: { color: '#64748b', size: 10 },
                 len: 0.8,
               },
               showscale: true,
               line: { color: '#ffffff', width: 1 },
-              opacity: 0.88,
+              opacity: 0.85,
             },
             hoverinfo: 'text',
           };
@@ -226,14 +223,14 @@ export const ParetoCharts: React.FC<ParetoChartsProps> = ({
             ],
             customdata: [presetA, presetB, presetC],
             mode: 'markers+text',
-            name: 'Phương án mẫu A, B, C',
+            name: 'Phương án A, B, C',
             textposition: 'top center',
-            textfont: { color: '#f8fafc', size: 11, family: 'sans-serif' },
+            textfont: { color: '#0f172a', size: 11, family: 'sans-serif' },
             type: 'scatter',
             marker: {
-              size: 16,
-              symbol: 'star-diamond',
-              color: ['#10b981', '#3b82f6', '#f59e0b'],
+              size: 14,
+              symbol: 'diamond',
+              color: ['#16a34a', '#2563eb', '#d97706'],
               line: { color: '#ffffff', width: 2 },
             },
             hoverinfo: 'text',
@@ -246,13 +243,13 @@ export const ParetoCharts: React.FC<ParetoChartsProps> = ({
               x: [selectedSolution.costBillion],
               y: [selectedSolution.traffic],
               mode: 'markers',
-              name: 'Nghiệm đang chọn',
+              name: 'Đang chọn',
               type: 'scatter',
               marker: {
-                size: 20,
+                size: 18,
                 symbol: 'circle-open',
-                color: '#facc15',
-                line: { color: '#facc15', width: 3 },
+                color: '#0f172a',
+                line: { color: '#0f172a', width: 2.5 },
               },
               hoverinfo: 'skip',
             });
@@ -260,23 +257,23 @@ export const ParetoCharts: React.FC<ParetoChartsProps> = ({
 
           const layout: any = {
             autosize: true,
-            margin: { l: 60, r: 30, t: 30, b: 50 },
-            paper_bgcolor: 'transparent',
-            plot_bgcolor: 'rgba(15, 23, 42, 0.4)',
+            margin: { l: 60, r: 30, t: 25, b: 50 },
+            paper_bgcolor: '#ffffff',
+            plot_bgcolor: '#f8fafc',
             xaxis: {
-              title: { text: 'Tổng Chi phí C_ct (Tỷ VNĐ)', font: { color: '#94a3b8', size: 12 } },
-              tickfont: { color: '#94a3b8', size: 10 },
-              gridcolor: 'rgba(51, 65, 85, 0.3)',
-              zerolinecolor: 'rgba(51, 65, 85, 0.5)',
+              title: { text: 'Tổng Chi phí C_ct (Tỷ VNĐ)', font: { color: '#334155', size: 12 } },
+              tickfont: { color: '#64748b', size: 10 },
+              gridcolor: '#e2e8f0',
+              zerolinecolor: '#cbd5e1',
             },
             yaxis: {
-              title: { text: 'Mức ảnh hưởng Giao thông GT (xe/giờ)', font: { color: '#94a3b8', size: 12 } },
-              tickfont: { color: '#94a3b8', size: 10 },
-              gridcolor: 'rgba(51, 65, 85, 0.3)',
-              zerolinecolor: 'rgba(51, 65, 85, 0.5)',
+              title: { text: 'Mức ảnh hưởng Giao thông GT (xe/giờ)', font: { color: '#334155', size: 12 } },
+              tickfont: { color: '#64748b', size: 10 },
+              gridcolor: '#e2e8f0',
+              zerolinecolor: '#cbd5e1',
             },
             legend: {
-              font: { color: '#cbd5e1', size: 11 },
+              font: { color: '#334155', size: 11 },
               orientation: 'h',
               y: 1.12,
               x: 0,
@@ -293,7 +290,7 @@ export const ParetoCharts: React.FC<ParetoChartsProps> = ({
 
           await Plotly.react(container, traces, layout, config);
         } else {
-          // 3D: Không gian Pareto 3 Chiều (X: Chi phí, Y: Tuổi thọ, Z: Giao thông)
+          // 3D: Mặt Pareto 3 Chiều
           const tracePareto3D = {
             x: paretoPoints.map((p) => p.costBillion),
             y: paretoPoints.map((p) => p.lifespan),
@@ -310,12 +307,12 @@ export const ParetoCharts: React.FC<ParetoChartsProps> = ({
             name: 'Nghiệm Pareto',
             type: 'scatter3d',
             marker: {
-              size: 5,
+              size: 4.5,
               color: paretoPoints.map((p) => p.costBillion),
               colorscale: 'Viridis',
               colorbar: {
-                title: { text: 'Chi phí (Tỷ)', font: { color: '#94a3b8', size: 11 } },
-                tickfont: { color: '#94a3b8', size: 10 },
+                title: { text: 'Chi phí (Tỷ)', font: { color: '#475569', size: 11 } },
+                tickfont: { color: '#64748b', size: 10 },
                 len: 0.7,
               },
               opacity: 0.85,
@@ -336,13 +333,13 @@ export const ParetoCharts: React.FC<ParetoChartsProps> = ({
             mode: 'markers+text',
             name: 'Điểm A, B, C',
             textposition: 'top center',
-            textfont: { color: '#ffffff', size: 11 },
+            textfont: { color: '#0f172a', size: 11 },
             type: 'scatter3d',
             marker: {
-              size: 10,
-              color: ['#10b981', '#3b82f6', '#f59e0b'],
+              size: 9,
+              color: ['#16a34a', '#2563eb', '#d97706'],
               symbol: 'diamond',
-              line: { color: '#ffffff', width: 2 },
+              line: { color: '#ffffff', width: 1.5 },
             },
             hoverinfo: 'text',
           };
@@ -358,8 +355,8 @@ export const ParetoCharts: React.FC<ParetoChartsProps> = ({
               name: 'Đang chọn',
               type: 'scatter3d',
               marker: {
-                size: 14,
-                color: '#facc15',
+                size: 12,
+                color: '#0f172a',
                 symbol: 'circle',
                 line: { color: '#ffffff', width: 2 },
               },
@@ -370,32 +367,32 @@ export const ParetoCharts: React.FC<ParetoChartsProps> = ({
           const layout: any = {
             autosize: true,
             margin: { l: 0, r: 0, t: 0, b: 0 },
-            paper_bgcolor: 'transparent',
+            paper_bgcolor: '#ffffff',
             scene: {
               xaxis: {
-                title: { text: 'Chi phí (Tỷ)', font: { color: '#94a3b8', size: 11 } },
-                tickfont: { color: '#94a3b8', size: 9 },
-                gridcolor: 'rgba(51, 65, 85, 0.4)',
-                backgroundcolor: 'rgba(15, 23, 42, 0.6)',
+                title: { text: 'Chi phí (Tỷ)', font: { color: '#334155', size: 11 } },
+                tickfont: { color: '#64748b', size: 9 },
+                gridcolor: '#e2e8f0',
+                backgroundcolor: '#f8fafc',
               },
               yaxis: {
-                title: { text: 'Tuổi thọ (Năm)', font: { color: '#94a3b8', size: 11 } },
-                tickfont: { color: '#94a3b8', size: 9 },
-                gridcolor: 'rgba(51, 65, 85, 0.4)',
-                backgroundcolor: 'rgba(15, 23, 42, 0.6)',
+                title: { text: 'Tuổi thọ (Năm)', font: { color: '#334155', size: 11 } },
+                tickfont: { color: '#64748b', size: 9 },
+                gridcolor: '#e2e8f0',
+                backgroundcolor: '#f8fafc',
               },
               zaxis: {
-                title: { text: 'Giao thông (xe/h)', font: { color: '#94a3b8', size: 11 } },
-                tickfont: { color: '#94a3b8', size: 9 },
-                gridcolor: 'rgba(51, 65, 85, 0.4)',
-                backgroundcolor: 'rgba(15, 23, 42, 0.6)',
+                title: { text: 'Giao thông (xe/h)', font: { color: '#334155', size: 11 } },
+                tickfont: { color: '#64748b', size: 9 },
+                gridcolor: '#e2e8f0',
+                backgroundcolor: '#f8fafc',
               },
               camera: {
                 eye: { x: 1.6, y: 1.6, z: 1.3 },
               },
             },
             legend: {
-              font: { color: '#cbd5e1', size: 11 },
+              font: { color: '#334155', size: 11 },
               orientation: 'h',
               y: 0.95,
               x: 0.05,
@@ -411,7 +408,7 @@ export const ParetoCharts: React.FC<ParetoChartsProps> = ({
           await Plotly.react(container, traces, layout, config);
         }
 
-        // Handle Click Event on Plotly points
+        // Click handler
         (container as any).removeAllListeners?.('plotly_click');
         (container as any).on?.('plotly_click', (eventData: any) => {
           if (eventData?.points?.[0]?.customdata) {
@@ -432,26 +429,27 @@ export const ParetoCharts: React.FC<ParetoChartsProps> = ({
   }, [activeView, solutions, selectedSolution, presetA, presetB, presetC, onSelectSolution]);
 
   return (
-    <div className="rounded-2xl bg-slate-900/90 border border-slate-800 p-5 shadow-xl backdrop-blur-md mb-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-3 border-b border-slate-800">
+    <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-xs mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-3 border-b border-slate-100">
         <div>
-          <h2 className="text-base font-bold text-white flex items-center gap-2">
-            <Compass className="w-4 h-4 text-cyan-400" />
-            Trực quan hóa Không gian Pareto (Pareto Front Visualization)
+          <h2 className="text-sm sm:text-base font-bold text-slate-900 flex items-center gap-2">
+            <Compass className="w-4 h-4 text-blue-600" />
+            Không gian Nghiệm Pareto (Pareto Front Visualization)
           </h2>
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-slate-500">
             Click vào bất kỳ điểm nào trên biểu đồ để xem chi tiết 18 đoạn cống tương ứng
           </p>
         </div>
 
         {/* View Switcher Tabs */}
-        <div className="flex items-center gap-1.5 p-1 bg-slate-950/80 rounded-xl border border-slate-800">
+        <div className="flex items-center gap-1 p-1 bg-slate-100 rounded-lg border border-slate-200">
           <button
+            type="button"
             onClick={() => setActiveView('cost-life')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition ${
+            className={`px-3 py-1.5 rounded-md text-xs font-semibold flex items-center gap-1.5 transition ${
               activeView === 'cost-life'
-                ? 'bg-cyan-500 text-slate-950 shadow-md'
-                : 'text-slate-400 hover:text-slate-200'
+                ? 'bg-white text-slate-900 shadow-xs'
+                : 'text-slate-600 hover:text-slate-900'
             }`}
           >
             <BarChart2 className="w-3.5 h-3.5" />
@@ -459,11 +457,12 @@ export const ParetoCharts: React.FC<ParetoChartsProps> = ({
           </button>
 
           <button
+            type="button"
             onClick={() => setActiveView('cost-traffic')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition ${
+            className={`px-3 py-1.5 rounded-md text-xs font-semibold flex items-center gap-1.5 transition ${
               activeView === 'cost-traffic'
-                ? 'bg-cyan-500 text-slate-950 shadow-md'
-                : 'text-slate-400 hover:text-slate-200'
+                ? 'bg-white text-slate-900 shadow-xs'
+                : 'text-slate-600 hover:text-slate-900'
             }`}
           >
             <Activity className="w-3.5 h-3.5" />
@@ -471,65 +470,66 @@ export const ParetoCharts: React.FC<ParetoChartsProps> = ({
           </button>
 
           <button
+            type="button"
             onClick={() => setActiveView('3d-pareto')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition ${
+            className={`px-3 py-1.5 rounded-md text-xs font-semibold flex items-center gap-1.5 transition ${
               activeView === '3d-pareto'
-                ? 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-md'
-                : 'text-slate-400 hover:text-slate-200'
+                ? 'bg-white text-slate-900 shadow-xs'
+                : 'text-slate-600 hover:text-slate-900'
             }`}
           >
             <Compass className="w-3.5 h-3.5" />
-            3D: Mặt Pareto 3 Chiều
+            3D: Mặt Pareto 3 Mục tiêu
           </button>
         </div>
       </div>
 
-      {/* Currently Selected Solution Quick Bar */}
+      {/* Selected solution info strip */}
       {selectedSolution && (
-        <div className="flex flex-wrap items-center justify-between gap-2 mb-3 px-3 py-2 rounded-xl bg-cyan-950/40 border border-cyan-500/30 text-xs">
+        <div className="flex flex-wrap items-center justify-between gap-2 mb-3 px-3 py-2 rounded-lg bg-slate-50 border border-slate-200 text-xs">
           <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-yellow-400 animate-pulse" />
-            <span className="text-slate-300">Đang chọn nghiệm:</span>
-            <span className="font-bold text-white font-mono">{selectedSolution.id}</span>
+            <span className="w-2 h-2 rounded-full bg-blue-600" />
+            <span className="text-slate-600">Đang chọn nghiệm:</span>
+            <span className="font-bold text-slate-900 font-mono">{selectedSolution.id}</span>
             {selectedSolution.isPreset && (
-              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-500/30 text-indigo-300 border border-indigo-500/40">
-                Phương án {selectedSolution.isPreset}
+              <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-blue-100 text-blue-800">
+                Phương án mẫu {selectedSolution.isPreset}
               </span>
             )}
           </div>
 
           <div className="flex items-center gap-4 text-xs font-medium">
             <span>
-              Chi phí: <strong className="text-emerald-400">{selectedSolution.costBillion.toFixed(3)} tỷ VNĐ</strong>
+              Chi phí: <strong className="text-emerald-700 font-mono">{selectedSolution.costBillion.toFixed(3)} tỷ</strong>
             </span>
             <span>
-              Tuổi thọ: <strong className="text-cyan-400">{selectedSolution.lifespan} năm</strong>
+              Tuổi thọ: <strong className="text-sky-700 font-mono">{selectedSolution.lifespan} năm</strong>
             </span>
             <span>
-              Giao thông: <strong className="text-amber-400">{selectedSolution.traffic} xe/h</strong>
+              Giao thông: <strong className="text-amber-700 font-mono">{selectedSolution.traffic} xe/h</strong>
             </span>
           </div>
         </div>
       )}
 
       {/* Plotly Canvas Container */}
-      <div className="relative w-full h-[450px] sm:h-[500px] rounded-xl bg-slate-950/60 border border-slate-800/80 overflow-hidden">
+      <div className="relative w-full h-[450px] sm:h-[480px] rounded-lg border border-slate-200 overflow-hidden bg-white">
         <div ref={chartContainerRef} className="w-full h-full" />
       </div>
 
-      <div className="mt-3 flex flex-wrap items-center justify-between text-[11px] text-slate-400">
+      <div className="mt-3 flex flex-wrap items-center justify-between text-[11px] text-slate-500">
         <div>
-          💡 <em>Mẹo:</em> Dùng chuột để xoay (đối với 3D), kéo phóng to hoặc nhấp đúp để đặt lại tầm nhìn.
+          💡 <em>Thao tác:</em> Dùng chuột để xoay (biểu đồ 3D), kéo chuột để zoom hoặc nhấp đúp để reset góc nhìn.
         </div>
         <div className="flex items-center gap-3">
-          <span className="inline-flex items-center gap-1 text-emerald-400">
-            ★ Điểm A (Min Chi phí)
+          <span className="inline-flex items-center gap-1 text-emerald-700 font-medium">
+            ◆ Điểm A (Min Chi phí)
           </span>
-          <span className="inline-flex items-center gap-1 text-blue-400">
-            ★ Điểm B (Max Tuổi thọ)
+          <span className="inline-flex items-center gap-1 text-blue-700 font-medium">
+            ◆ Điểm B (Max Tuổi thọ)
           </span>
-          <span className="inline-flex items-center gap-1 text-amber-400">
-            ★ Điểm C (Min Tắc đường)
+          <span className="inline-flex items-center gap-1 text-amber-700 font-medium">
+            ◆ Điểm C (Min Tắc đường)
           </span>
         </div>
       </div>

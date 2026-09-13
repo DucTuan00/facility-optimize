@@ -31,18 +31,19 @@ export const SEWER_SEGMENTS: PipeSegment[] = [
 
 /**
  * Bảng 2: Thông tin 4 loại vật liệu thay thế và tuổi thọ cống
+ * Định kiểu màu sắc thanh lịch, độ tương phản cao cho Light Mode
  */
 export const MATERIAL_INFO: Record<number, MaterialMeta> = {
   1: {
     id: 1,
     code: 'BTCT',
     name: 'BTCT',
-    fullName: 'Cống bê tông cốt thép',
+    fullName: 'Bê tông cốt thép',
     lifespan: 25,
-    color: '#64748b',       // Slate gray
-    textColor: 'text-slate-200',
-    bgLight: 'bg-slate-500/15',
-    borderColor: 'border-slate-500/40',
+    color: '#475569',
+    textColor: 'text-slate-700',
+    bgLight: 'bg-slate-100',
+    borderColor: 'border-slate-300',
   },
   2: {
     id: 2,
@@ -50,37 +51,37 @@ export const MATERIAL_INFO: Record<number, MaterialMeta> = {
     name: 'CSTT',
     fullName: 'Cốt sợi thủy tinh',
     lifespan: 30,
-    color: '#06b6d4',       // Cyan
-    textColor: 'text-cyan-300',
-    bgLight: 'bg-cyan-500/15',
-    borderColor: 'border-cyan-500/40',
+    color: '#0891b2',
+    textColor: 'text-cyan-800',
+    bgLight: 'bg-cyan-50',
+    borderColor: 'border-cyan-200',
   },
   3: {
     id: 3,
     code: 'HDPE',
     name: 'HDPE',
-    fullName: 'Cống nhựa HDPE',
+    fullName: 'Nhựa HDPE',
     lifespan: 50,
-    color: '#3b82f6',       // Blue
-    textColor: 'text-blue-300',
-    bgLight: 'bg-blue-500/15',
-    borderColor: 'border-blue-500/40',
+    color: '#2563eb',
+    textColor: 'text-blue-800',
+    bgLight: 'bg-blue-50',
+    borderColor: 'border-blue-200',
   },
   4: {
     id: 4,
     code: 'Sành',
     name: 'Sành',
-    fullName: 'Cống sành tráng men',
+    fullName: 'Sành tráng men',
     lifespan: 100,
-    color: '#f59e0b',       // Amber
-    textColor: 'text-amber-300',
-    bgLight: 'bg-amber-500/15',
-    borderColor: 'border-amber-500/40',
+    color: '#d97706',
+    textColor: 'text-amber-900',
+    bgLight: 'bg-amber-50',
+    borderColor: 'border-amber-200',
   },
 };
 
 /**
- * Phương pháp cải tạo theo Hình 2
+ * Phương pháp cải tạo theo Hình 2 (Light Mode)
  */
 export const METHOD_INFO: Record<number, MethodMeta> = {
   1: {
@@ -89,43 +90,43 @@ export const METHOD_INFO: Record<number, MethodMeta> = {
     name: 'TCN',
     fullName: 'Thay thế không mở móng (Thi công ngầm)',
     disruptsTraffic: false,
-    color: '#10b981',       // Emerald
-    textColor: 'text-emerald-300',
-    bgLight: 'bg-emerald-500/15',
-    borderColor: 'border-emerald-500/40',
+    color: '#16a34a',
+    textColor: 'text-emerald-800',
+    bgLight: 'bg-emerald-50',
+    borderColor: 'border-emerald-200',
   },
   2: {
     id: 2,
     code: 'TTMM',
     name: 'TTMM',
-    fullName: 'Thay thế cống mở móng (Đào hở)',
-    disruptsTraffic: true,  // a_i = 1 -> Gây gián đoạn giao thông
-    color: '#ef4444',       // Red
-    textColor: 'text-red-300',
-    bgLight: 'bg-red-500/15',
-    borderColor: 'border-red-500/40',
+    fullName: 'Thay thế mở móng (Đào hở)',
+    disruptsTraffic: true,  // a_i = 1 -> Gây ùn tắc giao thông
+    color: '#dc2626',
+    textColor: 'text-red-800',
+    bgLight: 'bg-red-50',
+    borderColor: 'border-red-200',
   },
   3: {
     id: 3,
     code: 'SCL',
     name: 'SCL',
-    fullName: 'Sửa chữa lớn (Chỉ dùng BTCT)',
+    fullName: 'Sửa chữa lớn (BTCT)',
     disruptsTraffic: false,
-    color: '#8b5cf6',       // Purple
-    textColor: 'text-purple-300',
-    bgLight: 'bg-purple-500/15',
-    borderColor: 'border-purple-500/40',
+    color: '#7c3aed',
+    textColor: 'text-purple-800',
+    bgLight: 'bg-purple-50',
+    borderColor: 'border-purple-200',
   },
   4: {
     id: 4,
     code: 'SCN',
     name: 'SCN',
-    fullName: 'Sửa chữa nhỏ (Chỉ dùng BTCT)',
+    fullName: 'Sửa chữa nhỏ (BTCT)',
     disruptsTraffic: false,
-    color: '#0284c7',       // Sky blue
-    textColor: 'text-sky-300',
-    bgLight: 'bg-sky-500/15',
-    borderColor: 'border-sky-500/40',
+    color: '#0284c7',
+    textColor: 'text-sky-800',
+    bgLight: 'bg-sky-50',
+    borderColor: 'border-sky-200',
   },
 };
 

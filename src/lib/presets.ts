@@ -142,7 +142,7 @@ export const PRESET_INFOS: PresetInfo[] = [
     costDesc: '~1,35 tỷ VNĐ',
     lifeDesc: '39 năm',
     trafficDesc: '0 xe/giờ (100% thi công ngầm)',
-    description: 'Bảo vệ giao thông đô thị du lịch Sầm Sơn tuyệt đối; không đào xới mặt đường.',
+    description: 'Bảo vệ giao thông đô thị tuyệt đối, không đào xới mặt đường; ưu tiên các trục giao thông chính.',
     genes: PRESET_C_GENES,
   },
 ];

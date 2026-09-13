@@ -138,10 +138,10 @@ function dominates(p: Individual, q: Individual): boolean {
   return notWorse && strictlyBetter;
 }
 
-// Fast Non-dominated Sorting
+// Fast Non-dominated Sorting (Optimized index-based $O(MN^2)$)
 function fastNonDominatedSort(population: Individual[]): Individual[][] {
   const n = population.length;
-  const fronts: Individual[][] = [[]];
+  const indexFronts: number[][] = [[]];
   const S: number[][] = Array.from({ length: n }, () => []);
   const domCount: number[] = Array(n).fill(0);
 
@@ -156,30 +156,29 @@ function fastNonDominatedSort(population: Individual[]): Individual[][] {
     }
     if (domCount[i] === 0) {
       population[i].rank = 1;
-      fronts[0].push(population[i]);
+      indexFronts[0].push(i);
     }
   }
 
   let curr = 0;
-  while (fronts[curr] && fronts[curr].length > 0) {
-    const nextFront: Individual[] = [];
-    for (const p of fronts[curr]) {
-      const pIdx = population.indexOf(p);
+  while (indexFronts[curr] && indexFronts[curr].length > 0) {
+    const nextFront: number[] = [];
+    for (const pIdx of indexFronts[curr]) {
       for (const qIdx of S[pIdx]) {
         domCount[qIdx]--;
         if (domCount[qIdx] === 0) {
           population[qIdx].rank = curr + 2;
-          nextFront.push(population[qIdx]);
+          nextFront.push(qIdx);
         }
       }
     }
     curr++;
     if (nextFront.length > 0) {
-      fronts.push(nextFront);
+      indexFronts.push(nextFront);
     }
   }
 
-  return fronts;
+  return indexFronts.map((f) => f.map((idx) => population[idx]));
 }
 
 // Crowding Distance Assignment
@@ -419,6 +418,9 @@ self.onmessage = async (e: MessageEvent) => {
             sampleFront: currentFront1.slice(0, 150),
           },
         });
+
+        // Yield execution to allow message dispatching and user interrupt handling
+        await new Promise((resolve) => setTimeout(resolve, 0));
       }
     }
 

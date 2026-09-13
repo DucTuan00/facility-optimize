@@ -8,6 +8,7 @@ import { ParetoCharts } from '@/components/ParetoCharts';
 import { WeightFilter } from '@/components/WeightFilter';
 import { SegmentTable } from '@/components/SegmentTable';
 import { ResearchModal } from '@/components/ResearchModal';
+import { ActiveSolutionBanner } from '@/components/ActiveSolutionBanner';
 import {
   AlgorithmParams,
   AlgorithmProgress,
@@ -18,10 +19,13 @@ import { DEFAULT_PARAMS } from '@/lib/constants';
 import { getPresetIndividuals } from '@/lib/presets';
 import { evaluateIndividual } from '@/lib/evaluation';
 
-export default function HomePage() {
-  // Preset Individuals from paper
-  const { A: presetA, B: presetB, C: presetC } = getPresetIndividuals();
+// Preset Individuals from paper (evaluated once at module level)
+const PRESETS = getPresetIndividuals();
+const presetA = PRESETS.A;
+const presetB = PRESETS.B;
+const presetC = PRESETS.C;
 
+export default function HomePage() {
   // Selected solution state (defaults to Preset A)
   const [selectedSolution, setSelectedSolution] = useState<Individual>(presetA);
   const [selectedPresetKey, setSelectedPresetKey] = useState<'A' | 'B' | 'C' | null>('A');
@@ -53,7 +57,7 @@ export default function HomePage() {
   const workerRef = useRef<Worker | null>(null);
 
   useEffect(() => {
-    // Instantiate Web Worker client-side
+    // Instantiate Web Worker client-side once
     try {
       const worker = new Worker(new URL('../workers/nsga2.worker.ts', import.meta.url));
       workerRef.current = worker;
@@ -114,7 +118,7 @@ export default function HomePage() {
     } catch (err) {
       console.error('Failed to initialize Web Worker:', err);
     }
-  }, [presetA, presetB, presetC]);
+  }, []);
 
   // Handler to Start NSGA-II
   const handleStart = () => {
@@ -160,9 +164,13 @@ export default function HomePage() {
     else setSelectedPresetKey(null);
   };
 
+  const handleScrollToTable = () => {
+    document.getElementById('step3-table')?.scrollIntoView({ behavior: 'smooth' });
+  };
+
   return (
-    <main className="min-h-screen bg-slate-950 py-8 px-4 sm:px-6 lg:px-8 text-slate-100">
-      <div className="max-w-7xl mx-auto">
+    <main className="min-h-screen bg-slate-50 py-6 sm:py-8 px-4 sm:px-6 lg:px-8 text-slate-800 pb-24">
+      <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
         <Header
           onOpenResearchModal={() => setIsModalOpen(true)}
@@ -170,55 +178,119 @@ export default function HomePage() {
           isRunning={isRunning}
         />
 
-        {/* 3 Preset Solutions */}
-        <PresetButtons
-          selectedPresetKey={selectedPresetKey}
-          onSelectPreset={handleSelectPreset}
-        />
+        {/* Step 1: Decision Options */}
+        <section aria-label="Bước 1: Chọn hoặc chạy phương án">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-3">
+            <div className="flex items-center gap-2">
+              <span className="flex items-center justify-center w-5 h-5 rounded-full bg-slate-900 text-white text-[11px] font-bold">
+                1
+              </span>
+              <h2 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-800">
+                Bước 1: Chọn phương án mẫu hoặc Chạy thuật toán tìm phương án mới
+              </h2>
+            </div>
+            <p className="text-[11px] text-slate-500">
+              💡 Bấm chọn nhanh A, B, C bên dưới hoặc bấm nút &quot;Bắt đầu Chạy NSGA-II&quot;
+            </p>
+          </div>
 
-        {/* Algorithm Control Panel */}
-        <ControlPanel
-          params={params}
-          onChangeParams={setParams}
-          isRunning={isRunning}
-          progress={progress}
-          elapsedMs={elapsedMs}
-          onStart={handleStart}
-          onStop={handleStop}
-          onReset={handleReset}
-        />
+          <div className="space-y-4">
+            {/* 3 Preset Solutions */}
+            <PresetButtons
+              selectedPresetKey={selectedPresetKey}
+              onSelectPreset={handleSelectPreset}
+            />
 
-        {/* Pareto Charts (2D and 3D) */}
-        <ParetoCharts
-          solutions={paretoSolutions}
-          selectedSolution={selectedSolution}
-          onSelectSolution={handleSelectSolution}
-          presetA={presetA}
-          presetB={presetB}
-          presetC={presetC}
-        />
+            {/* Algorithm Control Panel */}
+            <ControlPanel
+              params={params}
+              onChangeParams={setParams}
+              isRunning={isRunning}
+              progress={progress}
+              elapsedMs={elapsedMs}
+              onStart={handleStart}
+              onStop={handleStop}
+              onReset={handleReset}
+            />
+          </div>
+        </section>
 
-        {/* MCDA / AHP Weight Filter */}
-        <WeightFilter
-          weights={weights}
-          onChangeWeights={setWeights}
-          solutions={paretoSolutions}
-          onSelectSolution={handleSelectSolution}
-        />
+        {/* Step 2: Multi-objective Analysis */}
+        <section aria-label="Bước 2: Phân tích Pareto và Lọc trọng số">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-3">
+            <div className="flex items-center gap-2">
+              <span className="flex items-center justify-center w-5 h-5 rounded-full bg-slate-900 text-white text-[11px] font-bold">
+                2
+              </span>
+              <h2 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-800">
+                Bước 2: Phân tích &amp; Lọc phương án theo nhu cầu (Ngân sách / Độ bền / Giao thông)
+              </h2>
+            </div>
+            <p className="text-[11px] text-slate-500">
+              💡 Bảng 18 cống bên dưới sẽ tự động cập nhật ngay khi bạn click biểu đồ hoặc kéo thanh trượt
+            </p>
+          </div>
 
-        {/* Segment Inspector Table */}
-        <SegmentTable solution={selectedSolution} />
+          <div className="space-y-4">
+            {/* Pareto Charts (2D and 3D) */}
+            <ParetoCharts
+              solutions={paretoSolutions}
+              selectedSolution={selectedSolution}
+              onSelectSolution={handleSelectSolution}
+              presetA={presetA}
+              presetB={presetB}
+              presetC={presetC}
+            />
+
+            {/* MCDA / AHP Weight Filter */}
+            <WeightFilter
+              weights={weights}
+              onChangeWeights={setWeights}
+              solutions={paretoSolutions}
+              onSelectSolution={handleSelectSolution}
+              selectedSolutionId={selectedSolution?.id}
+            />
+          </div>
+        </section>
+
+        {/* Step 3: Segment Inspector Table */}
+        <section aria-label="Bước 3: Chi tiết 18 đoạn cống">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-3">
+            <div className="flex items-center gap-2">
+              <span className="flex items-center justify-center w-5 h-5 rounded-full bg-slate-900 text-white text-[11px] font-bold">
+                3
+              </span>
+              <h2 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-800">
+                Bước 3: Bản kế hoạch chi tiết cho 18 đoạn cống thi công
+              </h2>
+            </div>
+            <p className="text-[11px] text-slate-500">
+              💡 Kế hoạch cụ thể cho từng đoạn cống (loại ống, cách đào hay ngầm, đơn giá, chi phí)
+            </p>
+          </div>
+
+          <SegmentTable solution={selectedSolution} />
+        </section>
+
+        {/* Floating Active Solution Banner */}
+        <ActiveSolutionBanner
+          solution={selectedSolution}
+          onScrollToTable={handleScrollToTable}
+        />
 
         {/* Research Modal */}
         <ResearchModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
 
         {/* Footer */}
-        <footer className="mt-12 py-6 border-t border-slate-900 text-center text-xs text-slate-500">
-          <p>
-            Mô hình Tối ưu hóa Đa mục tiêu Cải tạo Hệ thống Thoát nước TP. Sầm Sơn, Thanh Hóa • Ứng dụng giải thuật NSGA-II
+        <footer className="pt-8 pb-4 border-t border-slate-200 text-center text-xs text-slate-500">
+          <p className="font-medium text-slate-700">
+            Hệ thống Quản lý &amp; Tối ưu hóa Cải tạo Mạng lưới Thoát nước Đô thị
           </p>
-          <p className="mt-1 text-slate-600">
-            Dựa trên công trình nghiên cứu của Đặng Minh Hải (2018), Tạp chí Khoa học Kỹ thuật Thủy lợi và Môi trường. Xây dựng bằng Next.js (App Router), TypeScript, Tailwind CSS và Web Worker Client-side.
+          <p className="mt-1 text-slate-500">
+            Mô hình toán học NSGA-II và bộ thông số thực nghiệm đối chiếu theo bài báo khoa học của Đặng Minh Hải (2018), Tạp chí KH&amp;KT Thủy lợi và Môi trường.
+          </p>
+          <p className="mt-0.5 text-[11px] text-slate-400">
+            Được triển khai Client-side Web Worker • Hỗ trợ xuất báo cáo tĩnh (Static Export)
           </p>
         </footer>
       </div>
